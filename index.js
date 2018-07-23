@@ -9,6 +9,7 @@ const blogRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 const config = require('./utils/config')
+const corsOptions = require('./utils/cors')
 
 const mongoUrl = config.mongoUrl
 const port = config.port
@@ -20,14 +21,13 @@ mongoose
     console.log(err)
   })
   
-app.use(cors())
 app.use(bodyParser.json())
 app.use(middleware.logger)
 app.use(middleware.tokenExtractor)
 
-app.use('/api/blogs', blogRouter)
-app.use('/api/users', usersRouter)
-app.use('/api/login', loginRouter)
+app.use('/api/blogs', cors(corsOptions), blogRouter)
+app.use('/api/users', cors(corsOptions), usersRouter)
+app.use('/api/login', cors(corsOptions), loginRouter)
 app.get('*', express.static('build'))
 app.use('*', express.static('build'))
 
