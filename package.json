@@ -1,0 +1,30 @@
+{
+  "name": "t4.1",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose",
+    "testlog": "cross-env NODE_ENV=test NODE_LOGGING=true jest --verbose",
+    "watch": "cross-env NODE_ENV=development nodemon index.js"
+  },
+  "author": "jvuor",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "eslint": "^5.1.0",
+    "jest": "^23.1.0",
+    "nodemon": "^1.17.5",
+    "supertest": "^3.1.0"
+  },
+  "dependencies": {
+    "bcrypt": "^2.0.1",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.1.6"
+  }
+}
