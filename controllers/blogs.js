@@ -68,6 +68,7 @@ blogRouter.post('/', async (request, response) => {
       author: body.author,
       content: body.content,
       title: body.title,
+      sticky: body.sticky,
       user: postingUser._id
     })
 
