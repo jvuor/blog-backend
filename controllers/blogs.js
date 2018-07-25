@@ -65,7 +65,6 @@ blogRouter.post('/', async (request, response) => {
     }
 
     const blog = new Blog({
-      author: body.author,
       content: body.content,
       title: body.title,
       sticky: body.sticky,
@@ -134,13 +133,13 @@ blogRouter.put('/:id', async (request, response) => {
 
     const id = request.params.id
     const changedBlog = {
-      author: request.body.author,
+      title: request.body.title,
       content: request.body.content,
       sticky: request.body.sticky
     }
     const blogToChange = await Blog.findById(id)
     if (blogToChange.user.toString() === decodedToken.id.toString()) {
-      const updatedBlog = await Blog.findByIdAndUpdate(id, changedBlog)
+      const updatedBlog = await Blog.findByIdAndUpdate(id, changedBlog, { new: true })
       return response.status(200).json(Blog.format(updatedBlog))
     } else {
       return response.status(403).send('error: wrong user')
