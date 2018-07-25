@@ -135,7 +135,8 @@ blogRouter.put('/:id', async (request, response) => {
     const id = request.params.id
     const changedBlog = {
       author: request.body.author,
-      content: request.body.content
+      content: request.body.content,
+      sticky: request.body.sticky
     }
     const blogToChange = await Blog.findById(id)
     if (blogToChange.user.toString() === decodedToken.id.toString()) {
