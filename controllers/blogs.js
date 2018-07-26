@@ -100,9 +100,8 @@ blogRouter.delete('/:id', async (request, response) => {
 
     if (blog.user.toString() === decodedToken.id.toString()) {
       var user = await User.findById(blog.user)
-      console.log(user.blogs.length)
       user.blogs = user.blogs.filter(blog => blog.toString() !== id.toString())
-      console.log(user.blogs.length)
+
       await user.save()
       await Blog.findByIdAndRemove(id)
 
