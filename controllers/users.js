@@ -48,7 +48,7 @@ usersRouter.get('/', async (request, response) => {
   try {
     const users = await User
       .find({})
-      .populate('blogs', { author: 1, content: 1 })
+      .populate('blogs', { author: 1, content: 1, title: 1 })
 
     const userList = users.map(m => User.format(m))
 
