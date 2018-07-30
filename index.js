@@ -28,6 +28,7 @@ app.use(middleware.tokenExtractor)
 app.use('/api/blogs', cors(corsOptions), blogRouter)
 app.use('/api/users', cors(corsOptions), usersRouter)
 app.use('/api/login', cors(corsOptions), loginRouter)
+app.use('/admin', express.static('admin'))
 app.get('*', express.static('build'))
 app.use('*', express.static('build'))
 
