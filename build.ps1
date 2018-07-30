@@ -16,3 +16,6 @@ rm -Recurse -Force .\frontend\ | Out-Null
 # Copying everything to the backend folder
 cp ..\admin\build\ .\admin\ -Recurse
 cp ..\frontend\dist\ .\frontend\ -Recurse
+
+# Docker build
+docker build -t jvuor/blog-app .

@@ -1,4 +1,4 @@
-var whitelist = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003']
+var whitelist = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003', 'http://jvuor-blog.herokuapp.com']
 
 var corsOptions = {
   origin: function (origin, callback) {
