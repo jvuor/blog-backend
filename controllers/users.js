@@ -19,13 +19,13 @@ usersRouter.post('/', async (request, response) => {
     }
 
     if (!body.password) {
-      return response.status(400).json({ error: 'password required'})
+      return response.status(400).json({ error: 'password required' })
     }
     if (!body.username) {
-      return response.status(400).json({ error: 'username required'})
+      return response.status(400).json({ error: 'username required' })
     }
     if (!body.name) {
-      return response.status(400).json({ error: 'name required'})
+      return response.status(400).json({ error: 'name required' })
     }
     if (body.password.length < 8) {
       return response.status(400).json({ error: 'password too short' })
@@ -67,7 +67,6 @@ usersRouter.get('/', async (request, response) => {
     response
       .status(200)
       .json(userList)
-
   } catch (exception) {
     console.log(exception)
     response.status(500).json({ error: 'error happened while getting users' })
@@ -91,7 +90,7 @@ usersRouter.put('/:id', async (request, response) => {
   const newPassword = request.body.password
 
   if (newPassword.length < 8) {
-    return response.status(400).json({error: 'password too short'})
+    return response.status(400).json({ error: 'password too short' })
   }
 
   const id = request.params.id
@@ -99,15 +98,15 @@ usersRouter.put('/:id', async (request, response) => {
 
   try {
     user = await User.findById(id)
-  } catch(err) {
+  } catch (err) {
     console.log(err)
-    return response.status(400).json({ error: 'bad user id'})
+    return response.status(400).json({ error: 'bad user id' })
   }
-  
+
   const newPasswordHash = await bcrypt.hash(newPassword, saltRounds)
   const newUserData = { passwordHash: newPasswordHash, ...User.format(user) }
   await User.findByIdAndUpdate(id, newUserData)
   return response.status(200).end()
-}) 
+})
 
 module.exports = usersRouter

@@ -6,7 +6,7 @@ var corsOptions = {
       callback(null, true)
     } else {
       console.log(origin)
-      callback('Not allowed by CORS:' + origin)
+      callback(new Error('Not allowed by CORS:' + origin))
     }
   }
 }

@@ -18,12 +18,12 @@ const port = config.port
 
 mongoose
   .connect(mongoUrl)
-  .then( () => { console.log('connected to database', mongoUrl)})
-  .catch( err => {
+  .then(() => { console.log('connected to database', mongoUrl) })
+  .catch(err => {
     console.log(err)
   })
-  
-app.use(compression({level: -1}))
+
+app.use(compression({ level: -1 }))
 app.use(sslRedirect())
 app.use(bodyParser.json())
 app.use(middleware.logger)
@@ -49,4 +49,4 @@ server.on('close', () => [
   mongoose.connection.close()
 ])
 
-module.exports = { app, server}
+module.exports = { app, server }
