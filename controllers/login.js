@@ -4,6 +4,10 @@ const loginRouter = require('express').Router()
 const User = require('../models/user')
 
 loginRouter.post('/', async (request, response) => {
+  // POST /api/login - returns a jwt when given valid user credentials
+  // expect JSON object:
+  // { "username": "[username]",
+  //   "password": "[password]"}
   const body = request.body
   const user = await User.findOne({username: body.username})
   

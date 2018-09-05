@@ -4,6 +4,7 @@ const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
 blogRouter.get('/', async (request, response) => {
+  // GET /api/blogs - returns all blog posts
   try {
     const blogs = await Blog
       .find({})
@@ -24,6 +25,7 @@ blogRouter.get('/', async (request, response) => {
 
 
 blogRouter.get('/:id', async (request, response) => {
+  // GET /api/blogs/id - returns one blog post by id
   const id = request.params.id
 
   try {
@@ -42,6 +44,12 @@ blogRouter.get('/:id', async (request, response) => {
 })
 
 blogRouter.post('/', async (request, response) => {
+  // POST /api/blogs - adds a new blog post.
+  // needs a valid JWT token
+  // expects a JSON object:
+  // { "title": "[title of the post]",
+  //   "content": "[content of the post]",
+  //   "sticky": "boolean, mark the post important or not. optional, but recommended." }
   const body = request.body
 
   //checking authentication first
@@ -90,6 +98,8 @@ blogRouter.post('/', async (request, response) => {
 })
 
 blogRouter.delete('/:id', async (request, response) => {
+  // DELETE /api/blogs/id - deletes a post by id
+  // needs a valid JWT token
   const id = request.params.id
 
   try {
@@ -124,6 +134,9 @@ blogRouter.delete('/:id', async (request, response) => {
 })
 
 blogRouter.put('/:id', async (request, response) => {
+  // PUT /blogs/api/id - edits an existing blog post.
+  // needs a valid JWT token
+  // expects JSON object, formatting identical to POST /api/blogs
   try {
     const token = request.token
     const decodedToken = jwt.verify(token, process.env.SECRET)
