@@ -6,6 +6,11 @@ usersRouter.post('/', async (request, response) => {
   try {
     const body = request.body
 
+    if (process.env.NODE_ENV === 'production') {
+      // no new users allowed from heroku api
+      return response.status(403).json({ error: 'forbidden' })
+    }
+
     if (!body.password) {
       return response.status(400).json({ error: 'password required'})
     }
