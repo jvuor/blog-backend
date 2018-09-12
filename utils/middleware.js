@@ -1,3 +1,5 @@
+const verifyToken = require('./verifyToken')
+
 const logger = (request, response, next) => {
   if (process.env.NODE_ENV === 'test' && process.env.NODE_LOGGING !== 'true') {
     return next()
@@ -13,10 +15,10 @@ const error = (request, response) => {
 const tokenExtractor = (request, response, next) => {
   const authorization = request.get('authorization')
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    request.token = authorization.substring(7)
-    console.log('extracted token', request.token)
+    const token = authorization.substring(7)
+    request.token = verifyToken(token)
+    console.log('token status: ', request.token)
   }
-
   next()
 }
 

@@ -3,6 +3,7 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const blogController = require('../controllers/blogs')
+const userController = require('../controllers/users')
 
 blogRouter.get('/', async (request, response) => {
   // GET /api/blogs - returns all blog posts
@@ -30,11 +31,11 @@ blogRouter.get('/:id', async (request, response) => {
     if (blog) {
       response.json(Blog.format(blog))
     } else {
-      response.status(404).end()
+      response.status(400).send({ error: 'bad id' })
     }
   } catch (exception) {
     console.log(exception)
-    response.status(400).send({ error: 'malformed id' })
+    response.status(500)
   }
 })
 
@@ -47,13 +48,9 @@ blogRouter.post('/', async (request, response) => {
   //   "sticky": "boolean, mark the post important or not. optional, but recommended." }
   const body = request.body
 
-  // checking authentication first
   try {
-    const token = request.token
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-
-    if (!token || !decodedToken.id) {
-      return response.status(401).json({ error: 'token missing or invalid' })
+    if (!request.token.verified) {
+      return response.status(403)
     }
     if (body.title === undefined) {
       return response.status(400).json({ error: 'title missing' })
@@ -62,16 +59,17 @@ blogRouter.post('/', async (request, response) => {
       return response.status(400).json({ error: 'content missing' })
     }
 
-    const postingUser = await User.findById(decodedToken.id)
+    const postingUser = await userController.getById(request.token.id)
+
     if (!postingUser) {
-      return response.status(400).json({ error: 'invalid user' })
+      return response.status(403).json({ error: 'invalid user' })
     }
 
     const blog = new Blog({
       content: body.content,
       title: body.title,
       sticky: body.sticky,
-      user: postingUser._id
+      user: postingUser.id
     })
 
     const blogResponse = await blog.save().then(b => b.populate('user', { username: 1, name: 1 }).execPopulate())
@@ -82,12 +80,8 @@ blogRouter.post('/', async (request, response) => {
 
     await user.save()
   } catch (exception) {
-    if (exception.name === 'JsonWebTokenError') {
-      response.status(401).json({ error: exception.message })
-    } else {
-      console.log(exception)
-      response.status(500).json({ error: 'error in post request' })
-    }
+    console.log(exception)
+    response.status(500).json({ error: 'error in post request' })
   }
 })
 
