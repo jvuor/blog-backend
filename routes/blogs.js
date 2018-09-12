@@ -65,23 +65,23 @@ blogRouter.post('/', async (request, response) => {
       return response.status(403).json({ error: 'invalid user' })
     }
 
-    const blog = new Blog({
+    const newBlog = await blogController.saveBlog({
       content: body.content,
       title: body.title,
       sticky: body.sticky,
-      user: postingUser.id
+      userId: postingUser.id
     })
 
-    const blogResponse = await blog.save().then(b => b.populate('user', { username: 1, name: 1 }).execPopulate())
-    response.status(201).json(Blog.format(blogResponse))
+    if (!newBlog) {
+      throw new Error('Error while saving blog')
+    }
 
-    const user = await User.findById(postingUser._id)
-    user.blogs = user.blogs.concat(blogResponse._id)
+    response.status(201).json(newBlog)
 
-    await user.save()
+    await userController.addNewBlogId(newBlog.user.id, newBlog.id)
   } catch (exception) {
     console.log(exception)
-    response.status(500).json({ error: 'error in post request' })
+    response.status(500)
   }
 })
 

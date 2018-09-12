@@ -10,4 +10,11 @@ const getById = async (id) => {
   }
 }
 
-module.exports = { getById }
+const addNewBlogId = async (userId, blogId) => {
+  const user = await User.findById(userId)
+  user.blogs = user.blogs.concat(blogId)
+
+  await user.save()
+}
+
+module.exports = { getById, addNewBlogId }
