@@ -1,7 +1,4 @@
 const blogRouter = require('express').Router()
-const Blog = require('../models/blog')
-const User = require('../models/user')
-const jwt = require('jsonwebtoken')
 const blogController = require('../controllers/blogs')
 const userController = require('../controllers/users')
 
@@ -17,7 +14,7 @@ blogRouter.get('/', async (request, response) => {
     }
   } catch (exception) {
     console.log(exception)
-    response.status(500)
+    response.status(500).end()
   }
 })
 
@@ -29,13 +26,13 @@ blogRouter.get('/:id', async (request, response) => {
     const blog = await blogController.getById(id)
 
     if (blog) {
-      response.json(Blog.format(blog))
+      response.json(blog)
     } else {
       response.status(400).send({ error: 'bad id' })
     }
   } catch (exception) {
     console.log(exception)
-    response.status(500)
+    response.status(500).end()
   }
 })
 
@@ -50,7 +47,7 @@ blogRouter.post('/', async (request, response) => {
 
   try {
     if (!request.token.verified) {
-      return response.status(403)
+      return response.status(403).end()
     }
     if (body.title === undefined) {
       return response.status(400).json({ error: 'title missing' })
@@ -79,9 +76,10 @@ blogRouter.post('/', async (request, response) => {
     response.status(201).json(newBlog)
 
     await userController.addNewBlogId(newBlog.user.id, newBlog.id)
+    // not sure if awaiting the above line makes a difference or not
   } catch (exception) {
     console.log(exception)
-    response.status(500)
+    response.status(500).end()
   }
 })
 
@@ -91,32 +89,26 @@ blogRouter.delete('/:id', async (request, response) => {
   const id = request.params.id
 
   try {
-    const token = request.token
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-
-    const blog = await Blog.findById(id)
-
-    if (blog.user.toString() === decodedToken.id.toString()) {
-      var user = await User.findById(blog.user)
-      user.blogs = user.blogs.filter(blog => blog.toString() !== id.toString())
-
-      await user.save()
-      await Blog.findByIdAndRemove(id)
-
-      return response
-        .status(204)
-        .end()
+    if (!request.token.verified) {
+      return response.status(403).end()
     }
 
-    return response
-      .status(401)
-      .send({ error: 'bad or missing token' })
+    const blog = await blogController.getById(id)
+
+    if (!blog) {
+      return response.status(400).json({ error: 'bad id' })
+    }
+
+    if (blog.user.toString() !== request.token.id.toString()) {
+      return response.status(403).end()
+    }
+
+    await blogController.deleteById(id, blog.user)
+
+    return response.status(204).end()
   } catch (exception) {
-    if (exception.name === 'JsonWebTokenError') {
-      response.status(401).json({ error: exception.message })
-    } else {
-      response.status(400).send({ error: 'bad id' })
-    }
+    console.log(exception)
+    response.status(500).end()
   }
 })
 
@@ -125,26 +117,36 @@ blogRouter.put('/:id', async (request, response) => {
   // needs a valid JWT token
   // expects JSON object, formatting identical to POST /api/blogs
   try {
-    const token = request.token
-    const decodedToken = jwt.verify(token, process.env.SECRET)
-
-    if (!token || !decodedToken) {
-      return response.status(401).send('token missing or invalid')
+    if (!request.token.verified) {
+      return response.status(403).end()
     }
 
     const id = request.params.id
-    const changedBlog = {
+    const blogToChange = await blogController.getById(id)
+
+    if (!blogToChange) {
+      return response.status(400).end()
+    }
+
+    if (blogToChange.user.toString() !== request.token.id) {
+      return response.status(403).end()
+    }
+
+    if (!request.body.title) {
+      return response.status(400).json({ error: 'title missing' })
+    }
+
+    if (!request.body.content) {
+      return response.status(400).json({ error: 'content missing' })
+    }
+
+    const changedData = {
       title: request.body.title,
       content: request.body.content,
-      sticky: request.body.sticky
+      sticky: request.body.sticky || false
     }
-    const blogToChange = await Blog.findById(id)
-    if (blogToChange.user.toString() === decodedToken.id.toString()) {
-      const updatedBlog = await Blog.findByIdAndUpdate(id, changedBlog, { new: true })
-      return response.status(200).json(Blog.format(updatedBlog))
-    } else {
-      return response.status(403).send('error: wrong user')
-    }
+    const updatedBlog = await blogController.changeBlog(id, changedData)
+    return response.status(200).json(updatedBlog)
   } catch (exception) {
     response.status(500).send('error while handling the request')
   }

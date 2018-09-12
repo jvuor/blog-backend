@@ -1,4 +1,5 @@
 const Blog = require('../models/blog')
+const userController = require('./users')
 
 const getAll = async () => {
   try {
@@ -43,4 +44,19 @@ const saveBlog = async (data) => {
   }
 }
 
-module.exports = { getAll, getById, saveBlog }
+const deleteById = async (id, userId = null) => {
+  if (!userId) {
+    userId = getById(id).user
+  }
+
+  await Blog.findByIdAndRemove(id)
+  await userController.deleteBlogById(userId, id)
+}
+
+const changeBlog = async (id, newData) => {
+  const updatedBlog = await Blog.findByIdAndUpdate(id, newData, { new: true })
+  const formattedBlog = Blog.format(updatedBlog)
+  return formattedBlog
+}
+
+module.exports = { getAll, getById, saveBlog, deleteById, changeBlog }

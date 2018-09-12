@@ -18,6 +18,8 @@ const tokenExtractor = (request, response, next) => {
     const token = authorization.substring(7)
     request.token = verifyToken(token)
     console.log('token status: ', request.token)
+  } else {
+    request.token = { verified: false }
   }
   next()
 }

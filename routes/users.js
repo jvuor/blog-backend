@@ -1,8 +1,5 @@
-const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
-const User = require('../models/user')
-
-const saltRounds = 10
+const userController = require('../controllers/users')
 
 usersRouter.post('/', async (request, response) => {
   // POST /api/users - used to create new users
@@ -15,7 +12,7 @@ usersRouter.post('/', async (request, response) => {
 
     if (process.env.NODE_ENV === 'production') {
       // no new users allowed from heroku api
-      return response.status(403).json({ error: 'forbidden' })
+      return response.status(403).end()
     }
 
     if (!body.password) {
@@ -31,25 +28,22 @@ usersRouter.post('/', async (request, response) => {
       return response.status(400).json({ error: 'password too short' })
     }
 
-    const oldUser = await User.find({ username: body.username })
-    if (oldUser.length > 0) {
+    if (await userController.checkExistingUsername(body.username)) {
       return response.status(400).json({ error: 'username already taken' })
     }
 
-    const passwordHash = await bcrypt.hash(body.password, saltRounds)
-
-    var user = new User({
+    var userData = {
       username: body.username,
       name: body.name,
-      passwordHash: passwordHash
-    })
+      password: body.password
+    }
 
-    const savedUser = await user.save()
+    const savedUser = await userController.addUser(userData)
 
     response.status(201).json(savedUser)
   } catch (exception) {
     console.log(exception)
-    response.status(500).json({ error: 'error happened' })
+    response.status(500).end()
   }
 })
 
@@ -58,11 +52,11 @@ usersRouter.get('/', async (request, response) => {
   // populates the response with title and id of every
   // post made by the user
   try {
-    const users = await User
-      .find({})
-      .populate('blogs', { author: 1, title: 1 })
+    const userList = await userController.getAll()
 
-    const userList = users.map(m => User.format(m))
+    if (!userList) {
+      return response.status(404).end()
+    }
 
     response
       .status(200)
@@ -80,7 +74,7 @@ usersRouter.put('/:id', async (request, response) => {
 
   if (process.env.NODE_ENV === 'production') {
     // not allowed on heroku
-    return response.status(403).json({ error: 'forbidden' })
+    return response.status(403).end()
   }
 
   if (!request.body || !request.body.password) {
@@ -94,19 +88,22 @@ usersRouter.put('/:id', async (request, response) => {
   }
 
   const id = request.params.id
-  let user
 
-  try {
-    user = await User.findById(id)
-  } catch (err) {
-    console.log(err)
-    return response.status(400).json({ error: 'bad user id' })
+  if (!request.token.verified) {
+    return response.status(403).end()
   }
 
-  const newPasswordHash = await bcrypt.hash(newPassword, saltRounds)
-  const newUserData = { passwordHash: newPasswordHash, ...User.format(user) }
-  await User.findByIdAndUpdate(id, newUserData)
-  return response.status(200).end()
+  if (request.token.id !== id) {
+    return response.status(403).end()
+  }
+
+  try {
+    await userController.changePassword(id, newPassword)
+    return response.status(200).end()
+  } catch (err) {
+    console.log(err)
+    return response.status(500).end()
+  }
 })
 
 module.exports = usersRouter
