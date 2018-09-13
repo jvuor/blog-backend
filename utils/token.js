@@ -14,4 +14,9 @@ const verifyToken = (token) => {
   }
 }
 
-module.exports = verifyToken
+const signToken = (tokenData) => {
+  const token = jwt.sign(tokenData, process.env.SECRET)
+  return token
+}
+
+module.exports = { verifyToken, signToken }

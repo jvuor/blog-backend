@@ -1,4 +1,4 @@
-const verifyToken = require('./verifyToken')
+const { verifyToken } = require('./token')
 
 const logger = (request, response, next) => {
   if (process.env.NODE_ENV === 'test' && process.env.NODE_LOGGING !== 'true') {

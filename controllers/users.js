@@ -1,5 +1,5 @@
 const User = require('../models/user')
-const hashPassword = require('../utils/hashPassword')
+const { hashPassword } = require('../utils/password')
 
 const getAll = async () => {
   try {
@@ -42,6 +42,15 @@ const getById = async (id) => {
   }
 }
 
+const getByUsername = async (username) => {
+  try {
+    const user = await User.findOne({ username: username })
+    return user
+  } catch (exc) {
+    return false
+  }
+}
+
 const addNewBlogId = async (userId, blogId) => {
   const user = await User.findById(userId)
   user.blogs = user.blogs.concat(blogId)
@@ -74,6 +83,7 @@ module.exports = {
   getAll,
   addUser,
   getById,
+  getByUsername,
   addNewBlogId,
   deleteBlogById,
   checkExistingUsername,
