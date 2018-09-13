@@ -9,7 +9,6 @@ const verifyToken = (token) => {
       id: decodedToken.id.toString()
     }
   } catch (exc) {
-    console.log(exc)
     return { verified: false }
   }
 }
