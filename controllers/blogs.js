@@ -1,10 +1,14 @@
 const Blog = require('../models/blog')
 const userController = require('./users')
 
-const getAll = async () => {
+const getAll = async (publishedOnly = false) => {
+  const condition = {}
+  if (publishedOnly) {
+    condition.published = true
+  }
   try {
     let blogList = await Blog
-      .find({})
+      .find(condition)
       .sort('-created') // sorted by created date
       .populate('user', { username: 1, name: 1 })
     blogList = blogList.map(blog => Blog.format(blog))
@@ -29,14 +33,17 @@ const saveBlog = async (data) => {
     content: data.content,
     title: data.title,
     sticky: data.sticky,
-    user: data.userId
+    user: data.userId,
+    published: false
   })
 
   try {
     const response = await blog
       .save()
       .then(b => b.populate('user', { username: 1, name: 1 }).execPopulate())
+    console.log(blog)
     const formattedBlog = Blog.format(response)
+    console.log(formattedBlog)
     return formattedBlog
   } catch (e) {
     console.log(e)

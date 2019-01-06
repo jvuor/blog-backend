@@ -3,9 +3,32 @@ const blogController = require('../controllers/blogs')
 const userController = require('../controllers/users')
 
 blogRouter.get('/', async (request, response) => {
-  // GET /api/blogs - returns all blog posts
+  // GET /api/blogs - returns all _published_ blog posts.
+  // To get absolutely everything, use /api/blogs/all instead
   try {
-    const blogs = await blogController.getAll()
+    const blogs = await blogController.getAll(true)
+
+    if (blogs) {
+      response.json(blogs)
+    } else {
+      response.status(404).end()
+    }
+  } catch (exception) {
+    console.log(exception)
+    response.status(500).end()
+  }
+})
+
+blogRouter.get('/all', async (request, response) => {
+  // GET /api/blogs/all - returns all blog posts.
+  // needs a valid jwt token.
+
+  if (!request.token.verified) {
+    return response.status(403).end()
+  }
+
+  try {
+    const blogs = await blogController.getAll(false)
 
     if (blogs) {
       response.json(blogs)
@@ -132,19 +155,19 @@ blogRouter.put('/:id', async (request, response) => {
       return response.status(403).end()
     }
 
-    if (!request.body.title) {
-      return response.status(400).json({ error: 'title missing' })
-    }
-
-    if (!request.body.content) {
-      return response.status(400).json({ error: 'content missing' })
-    }
-
     const changedData = {
-      title: request.body.title,
-      content: request.body.content,
-      sticky: request.body.sticky || false
+      sticky: request.body.sticky || false,
+      published: request.body.published || false
     }
+
+    if (request.body.title) {
+      changedData.title = request.body.title
+    }
+
+    if (request.body.content) {
+      changedData.content = request.body.content
+    }
+
     const updatedBlog = await blogController.changeBlog(id, changedData)
     return response.status(200).json(updatedBlog)
   } catch (exception) {
