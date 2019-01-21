@@ -10,7 +10,7 @@ blogRouter.get('/', async (request, response) => {
     if (blogs) {
       response.json(blogs)
     } else {
-      response.status(404).end()
+      response.status(204).end()
     }
   } catch (exception) {
     console.log(exception)

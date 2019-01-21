@@ -8,16 +8,14 @@ const blogSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 })
 
-blogSchema.statics.format = (blog) => {
-  return {
-    id: blog._id,
-    title: blog.title,
-    content: blog.content,
-    created: blog.created,
-    sticky: blog.sticky || false,
-    user: blog.user
-  }
-}
+blogSchema.statics.format = (blog) => ({
+  id: blog._id,
+  title: blog.title,
+  content: blog.content,
+  created: blog.created,
+  sticky: blog.sticky || false,
+  user: blog.user
+})
 
 const Blog = mongoose.model('Blog', blogSchema)
 
