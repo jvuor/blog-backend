@@ -32,7 +32,7 @@ usersRouter.post('/', async (request, response) => {
       return response.status(400).json({ error: 'username already taken' })
     }
 
-    var userData = {
+    const userData = {
       username: body.username,
       name: body.name,
       password: body.password

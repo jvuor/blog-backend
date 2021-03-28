@@ -59,7 +59,7 @@ const addNewBlogId = async (userId, blogId) => {
 }
 
 const deleteBlogById = async (userId, blogId) => {
-  var user = await User.findById(userId)
+  const user = await User.findById(userId)
   user.blogs = user.blogs.filter(blog => blog.toString() !== blogId.toString())
 
   await user.save()
