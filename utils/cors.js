@@ -1,4 +1,6 @@
-const whitelist = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003', 'https://jvuor-blog.herokuapp.com', 'http://localhost:4200', 'https://www.jussi.app', 'http://127.0.0.1']
+const whitelist = (process.env.NODE_ENV !== 'production')
+  ? ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003']
+  : ['https://www.jussi.app']
 
 const corsOptions = {
   origin: function (origin, callback) {
